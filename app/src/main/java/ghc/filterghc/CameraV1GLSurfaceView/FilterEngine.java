@@ -92,6 +92,7 @@ public class FilterEngine {
             "  gl_Position = " + POSITION_ATTRIBUTE + ";\n" +
             "}\n";
 
+    // 之前设置了灰度值，现在设置为彩色预览
     private static final String FRAGMENT_SHADER = "" +
             "#extension GL_OES_EGL_image_external : require\n" +
             "precision mediump float;\n" +
@@ -99,9 +100,9 @@ public class FilterEngine {
             "varying vec2 vTextureCoord;\n" +
             "void main() \n" +
             "{\n" +
-            "vec4 vCameraColor = texture2D(" + TEXTURE_SAMPLER_UNIFORM + ", vTextureCoord);\n" +
-            "float fGrayColor = (0.3*vCameraColor.r + 0.59*vCameraColor.g + 0.11*vCameraColor.b);\n" +
-            "  gl_FragColor = vec4(fGrayColor, fGrayColor, fGrayColor, 1.0);\n" +
+            "gl_FragColor = texture2D(" + TEXTURE_SAMPLER_UNIFORM + ", vTextureCoord);\n" +
+//            "float fGrayColor = (0.3*vCameraColor.r + 0.59*vCameraColor.g + 0.11*vCameraColor.b);\n" +
+//            "  gl_FragColor = vec4(fGrayColor, fGrayColor, fGrayColor, 1.0);\n" +
             "}\n";
 
     public FloatBuffer createBuffer(float[] vertexData) {

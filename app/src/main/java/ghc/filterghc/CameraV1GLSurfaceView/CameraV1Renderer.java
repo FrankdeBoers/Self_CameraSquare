@@ -11,9 +11,6 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import static android.opengl.GLES11.glClipPlanef;
-import static android.opengl.GLES11.glDisable;
-import static android.opengl.GLES11.glEnable;
 import static android.opengl.GLES20.GL_FRAMEBUFFER;
 import static android.opengl.GLES20.GL_TRIANGLES;
 import static android.opengl.GLES20.glActiveTexture;
@@ -28,12 +25,7 @@ import static android.opengl.GLES20.glGetUniformLocation;
 import static android.opengl.GLES20.glUniform1i;
 import static android.opengl.GLES20.glUniformMatrix4fv;
 import static android.opengl.GLES20.glVertexAttribPointer;
-import static javax.microedition.khronos.opengles.GL11.GL_CLIP_PLANE0;
-import static javax.microedition.khronos.opengles.GL11.GL_CLIP_PLANE1;
-import static javax.microedition.khronos.opengles.GL11.GL_CLIP_PLANE2;
-import static javax.microedition.khronos.opengles.GL11.GL_CLIP_PLANE3;
 import static javax.microedition.khronos.opengles.GL11.GL_FLOAT;
-import static javax.microedition.khronos.opengles.GL11.GL_POLYGON_OFFSET_UNITS;
 
 /**
  * Created by GHC on 2017/6/12.
@@ -57,10 +49,13 @@ public class CameraV1Renderer implements GLSurfaceView.Renderer {
     private int uTextureSamplerLocation = -1;
     private int[] mFBOIds = new int[1];
 
-    public void init(CameraV1GLSurfaceView glSurfaceView, CameraV1 camera, boolean isPreviewStarted) {
+    private int mScreenWidth = 800;
+
+    public void init(CameraV1GLSurfaceView glSurfaceView, CameraV1 camera, boolean isPreviewStarted, int width) {
         mGLSurfaceView = glSurfaceView;
         mCamera = camera;
         bIsPreviewStarted = isPreviewStarted;
+        mScreenWidth = width;
 
     }
 
@@ -84,7 +79,7 @@ public class CameraV1Renderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl) {
 
         gl.glEnable(GL10.GL_SCISSOR_TEST);
-        gl.glScissor(20, 20, 600, 600);
+        gl.glScissor(20, 20, mScreenWidth, mScreenWidth);
 
         Long t1 = System.currentTimeMillis();
         if (mSurfaceTexture != null) {
@@ -98,7 +93,6 @@ public class CameraV1Renderer implements GLSurfaceView.Renderer {
             return;
         }
 
-        //glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
 
         aPositionLocation = glGetAttribLocation(mShaderProgram, FilterEngine.POSITION_ATTRIBUTE);
@@ -121,10 +115,7 @@ public class CameraV1Renderer implements GLSurfaceView.Renderer {
             glVertexAttribPointer(aTextureCoordLocation, 2, GL_FLOAT, false, 16, mDataBuffer);
         }
 
-        //glDrawElements(GL_TRIANGLE_FAN, 6,GL_UNSIGNED_INT, 0);
-        //glDrawArrays(GL_TRIANGLE_FAN, 0 , 6);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        //glDrawArrays(GL_TRIANGLES, 3, 3);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         long t2 = System.currentTimeMillis();
         long t = t2 - t1;
@@ -163,34 +154,4 @@ public class CameraV1Renderer implements GLSurfaceView.Renderer {
         bIsPreviewStarted = false;
     }
 
-    private void beforeDraw() {
-
-        glEnable(GL_CLIP_PLANE0);
-        glEnable(GL_CLIP_PLANE1);
-        glEnable(GL_CLIP_PLANE2);
-        glEnable(GL_CLIP_PLANE3);
-
-        float[] planeTop = {0.0f, -1.0f, 0.0f, 100.0f};
-        float planeBottom[] = {0.0f, 1.0f, 0.0f, -100.0f};
-        float planeLeft[] = {1.0f, 0.0f, 0.0f, -100.0f};
-        float planeRight[] = {-1.0f, 0.0f, 0.0f, 100.0f};
-
-        glClipPlanef(GL_CLIP_PLANE0, planeTop, GL_POLYGON_OFFSET_UNITS);
-        glClipPlanef(GL_CLIP_PLANE1, planeBottom, GL_POLYGON_OFFSET_UNITS);
-        glClipPlanef(GL_CLIP_PLANE2, planeLeft, GL_POLYGON_OFFSET_UNITS);
-        glClipPlanef(GL_CLIP_PLANE3, planeRight, GL_POLYGON_OFFSET_UNITS);
-
-    }
-
-    private void afterDraw() {
-
-        glDisable(GL_CLIP_PLANE0);
-
-        glDisable(GL_CLIP_PLANE1);
-
-        glDisable(GL_CLIP_PLANE2);
-
-        glDisable(GL_CLIP_PLANE3);
-
-    }
 }
