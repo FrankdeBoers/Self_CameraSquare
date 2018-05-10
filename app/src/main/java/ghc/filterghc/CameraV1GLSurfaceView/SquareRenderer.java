@@ -31,16 +31,16 @@ import static javax.microedition.khronos.opengles.GL11.GL_FLOAT;
  * Created by GHC on 2017/6/12.
  */
 
-public class CameraV1Renderer implements GLSurfaceView.Renderer {
+public class SquareRenderer implements GLSurfaceView.Renderer {
 
     private static final String TAG = "Filter_MyRenderer";
     private int mOESTextureId = -1;
     private SurfaceTexture mSurfaceTexture;
     private float[] transformMatrix = new float[16];
-    private CameraV1GLSurfaceView mGLSurfaceView;
-    private CameraV1 mCamera;
+    private SquareGLSurfaceView mGLSurfaceView;
+    private SquareCamera mCamera;
     private boolean bIsPreviewStarted;
-    private FilterEngine mFilterEngine;
+    private RenderEngine mRenderEngine;
     private FloatBuffer mDataBuffer;
     private int mShaderProgram = -1;
     private int aPositionLocation = -1;
@@ -51,7 +51,7 @@ public class CameraV1Renderer implements GLSurfaceView.Renderer {
 
     private int mScreenWidth = 800;
 
-    public void init(CameraV1GLSurfaceView glSurfaceView, CameraV1 camera, boolean isPreviewStarted, int width) {
+    public void init(SquareGLSurfaceView glSurfaceView, SquareCamera camera, boolean isPreviewStarted, int width) {
         mGLSurfaceView = glSurfaceView;
         mCamera = camera;
         bIsPreviewStarted = isPreviewStarted;
@@ -61,10 +61,10 @@ public class CameraV1Renderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        mOESTextureId = TextureUtil.createOESTextureObject();
-        mFilterEngine = new FilterEngine(mOESTextureId);
-        mDataBuffer = mFilterEngine.getBuffer();
-        mShaderProgram = mFilterEngine.getShaderProgram();
+        mOESTextureId = createOESTextureObject();
+        mRenderEngine = new RenderEngine(mOESTextureId);
+        mDataBuffer = mRenderEngine.getBuffer();
+        mShaderProgram = mRenderEngine.getShaderProgram();
         glGenFramebuffers(1, mFBOIds, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, mFBOIds[0]);
         Log.i(TAG, "onSurfaceCreated: mFBOId: " + mFBOIds[0]);
@@ -72,14 +72,14 @@ public class CameraV1Renderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
-        Log.d(TAG, "width: " + width + " ; height: " + height);
+        Log.d(TAG, "screen size width: " + width + " ; height: " + height);
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
 
         gl.glEnable(GL10.GL_SCISSOR_TEST);
-        gl.glScissor(20, 20, mScreenWidth, mScreenWidth);
+        gl.glScissor(20, 20, Constant.CUSTOM_PREVIEW_WIDTH, Constant.CUSTOM_PREVIEW_HEIGHT);
 
         Long t1 = System.currentTimeMillis();
         if (mSurfaceTexture != null) {
@@ -95,10 +95,10 @@ public class CameraV1Renderer implements GLSurfaceView.Renderer {
 
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
 
-        aPositionLocation = glGetAttribLocation(mShaderProgram, FilterEngine.POSITION_ATTRIBUTE);
-        aTextureCoordLocation = glGetAttribLocation(mShaderProgram, FilterEngine.TEXTURE_COORD_ATTRIBUTE);
-        uTextureMatrixLocation = glGetUniformLocation(mShaderProgram, FilterEngine.TEXTURE_MATRIX_UNIFORM);
-        uTextureSamplerLocation = glGetUniformLocation(mShaderProgram, FilterEngine.TEXTURE_SAMPLER_UNIFORM);
+        aPositionLocation = glGetAttribLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.POSITION_ATTRIBUTE);
+        aTextureCoordLocation = glGetAttribLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.TEXTURE_COORD_ATTRIBUTE);
+        uTextureMatrixLocation = glGetUniformLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.TEXTURE_MATRIX_UNIFORM);
+        uTextureSamplerLocation = glGetUniformLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.TEXTURE_SAMPLER_UNIFORM);
 
         glActiveTexture(GLES20.GL_TEXTURE0);
         glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mOESTextureId);
@@ -141,8 +141,8 @@ public class CameraV1Renderer implements GLSurfaceView.Renderer {
     }
 
     public void deinit() {
-        if (mFilterEngine != null) {
-            mFilterEngine = null;
+        if (mRenderEngine != null) {
+            mRenderEngine = null;
         }
         mDataBuffer = null;
         if (mSurfaceTexture != null) {
@@ -152,6 +152,22 @@ public class CameraV1Renderer implements GLSurfaceView.Renderer {
         mCamera = null;
         mOESTextureId = -1;
         bIsPreviewStarted = false;
+    }
+
+    public static int createOESTextureObject() {
+        int[] tex = new int[1];
+        GLES20.glGenTextures(1, tex, 0);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, tex[0]);
+        GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
+        GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+        GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
+        return tex[0];
     }
 
 }

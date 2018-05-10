@@ -8,10 +8,10 @@ import android.util.DisplayMetrics;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class CameraV1GLSurfaceViewActivity extends Activity {
-    private CameraV1GLSurfaceView mGLSurfaceView;
+public class SquareGLSurfaceViewActivity extends Activity {
+    private SquareGLSurfaceView mGLSurfaceView;
     private int mCameraId;
-    private CameraV1 mCamera;
+    private SquareCamera mCamera;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,14 +21,14 @@ public class CameraV1GLSurfaceViewActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        mGLSurfaceView = new CameraV1GLSurfaceView(this);
+        mGLSurfaceView = new SquareGLSurfaceView(this);
         mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
         DisplayMetrics dm = new DisplayMetrics();
-        mCamera = new CameraV1(this);
+        mCamera = new SquareCamera(this);
         if (!mCamera.openCamera(dm.widthPixels, dm.heightPixels, mCameraId)) {
             return;
         }
-        mGLSurfaceView.init(mCamera, false);
+        mGLSurfaceView.initGLSView(mCamera, false);
         setContentView(mGLSurfaceView);
     }
 
@@ -37,7 +37,7 @@ public class CameraV1GLSurfaceViewActivity extends Activity {
         super.onPause();
         if (mGLSurfaceView != null) {
             mGLSurfaceView.onPause();
-            mGLSurfaceView.deinit();
+            mGLSurfaceView.unInitGLSView();
             mGLSurfaceView = null;
         }
 

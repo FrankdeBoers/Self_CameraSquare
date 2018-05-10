@@ -33,9 +33,9 @@ import static android.opengl.GLES20.glVertexAttribPointer;
  * Created by GHC on 2017/6/12.
  */
 
-public class FilterEngine {
+public class RenderEngine {
 
-    private static FilterEngine filterEngine = null;
+    private static RenderEngine renderEngine = null;
 
     private FloatBuffer mBuffer;
     private int mOESTextureId = -1;
@@ -49,23 +49,13 @@ public class FilterEngine {
     private int uTextureMatrixLocation = -1;
     private int uTextureSamplerLocation = -1;
 
-    public FilterEngine(int OESTextureId) {
+    public RenderEngine(int OESTextureId) {
         mOESTextureId = OESTextureId;
         mBuffer = createBuffer(vertexData);
         vertexShader = loadShader(GL_VERTEX_SHADER, VERTEX_SHADER);
         fragmentShader = loadShader(GL_FRAGMENT_SHADER, FRAGMENT_SHADER);
         mShaderProgram = linkProgram(vertexShader, fragmentShader);
     }
-
-    /*public static FilterEngine getInstance() {
-        if (filterEngine == null) {
-            synchronized (FilterEngine.class) {
-                if (filterEngine == null)
-                    filterEngine = new FilterEngine();
-            }
-        }
-        return filterEngine;
-    }*/
 
     private static final float[] vertexData = {
             1f, 1f, 1f, 1f,
@@ -92,7 +82,6 @@ public class FilterEngine {
             "  gl_Position = " + POSITION_ATTRIBUTE + ";\n" +
             "}\n";
 
-    // 之前设置了灰度值，现在设置为彩色预览
     private static final String FRAGMENT_SHADER = "" +
             "#extension GL_OES_EGL_image_external : require\n" +
             "precision mediump float;\n" +
@@ -101,8 +90,6 @@ public class FilterEngine {
             "void main() \n" +
             "{\n" +
             "gl_FragColor = texture2D(" + TEXTURE_SAMPLER_UNIFORM + ", vTextureCoord);\n" +
-//            "float fGrayColor = (0.3*vCameraColor.r + 0.59*vCameraColor.g + 0.11*vCameraColor.b);\n" +
-//            "  gl_FragColor = vec4(fGrayColor, fGrayColor, fGrayColor, 1.0);\n" +
             "}\n";
 
     public FloatBuffer createBuffer(float[] vertexData) {
@@ -137,10 +124,10 @@ public class FilterEngine {
     }
 
     public void drawTexture(float[] transformMatrix) {
-        aPositionLocation = glGetAttribLocation(mShaderProgram, FilterEngine.POSITION_ATTRIBUTE);
-        aTextureCoordLocation = glGetAttribLocation(mShaderProgram, FilterEngine.TEXTURE_COORD_ATTRIBUTE);
-        uTextureMatrixLocation = glGetUniformLocation(mShaderProgram, FilterEngine.TEXTURE_MATRIX_UNIFORM);
-        uTextureSamplerLocation = glGetUniformLocation(mShaderProgram, FilterEngine.TEXTURE_SAMPLER_UNIFORM);
+        aPositionLocation = glGetAttribLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.POSITION_ATTRIBUTE);
+        aTextureCoordLocation = glGetAttribLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.TEXTURE_COORD_ATTRIBUTE);
+        uTextureMatrixLocation = glGetUniformLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.TEXTURE_MATRIX_UNIFORM);
+        uTextureSamplerLocation = glGetUniformLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.TEXTURE_SAMPLER_UNIFORM);
 
         glActiveTexture(GL_TEXTURE_EXTERNAL_OES);
         glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mOESTextureId);

@@ -12,12 +12,12 @@ import java.io.IOException;
  * Created by GHC on 2017/6/27.
  */
 
-public class CameraV1 {
+public class SquareCamera {
     private Activity mActivity;
     private int mCameraId;
     private Camera mCamera;
 
-    public CameraV1(Activity activity) {
+    public SquareCamera(Activity activity) {
         mActivity = activity;
     }
 
@@ -28,7 +28,7 @@ public class CameraV1 {
             Camera.Parameters parameters = mCamera.getParameters();
 //            parameters.set("orientation", "portrait");
 //            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-            parameters.setPreviewSize(1280, 720);
+            parameters.setPreviewSize(Constant.SYSTEM_PREVIEW_WIDTH, Constant.SYSTEM_PREVIEW_HEIGHT);
             setCameraDisplayOrientation(mActivity, mCameraId, mCamera);
             mCamera.setParameters(parameters);
             Log.i("GHC", "open camera");

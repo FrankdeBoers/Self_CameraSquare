@@ -9,31 +9,30 @@ import android.view.WindowManager;
  * Created by GHC on 2017/6/12.
  */
 
-public class CameraV1GLSurfaceView extends GLSurfaceView {
+public class SquareGLSurfaceView extends GLSurfaceView {
 
     private static final String TAG = "CameraV1GLSurfaceView";
 
-    private CameraV1Renderer mRenderer;
+    private SquareRenderer mRenderer;
     private int textureId = -1;
 
-    public CameraV1GLSurfaceView(Context context) {
+    public SquareGLSurfaceView(Context context) {
         super(context);
     }
 
-    public void init(CameraV1 camera, boolean isPreviewStarted) {
-
+    public void initGLSView(SquareCamera camera, boolean isPreviewStarted) {
         WindowManager wm = (WindowManager) getContext()
                 .getSystemService(Context.WINDOW_SERVICE);
         int width = wm.getDefaultDisplay().getWidth();
-        Log.d(TAG, "[init] >> width:" + width);
+        Log.d(TAG, "[initGLSView] >> width:" + width);
 
         setEGLContextClientVersion(2);
-        mRenderer = new CameraV1Renderer();
+        mRenderer = new SquareRenderer();
         mRenderer.init(this, camera, isPreviewStarted, width);
         setRenderer(mRenderer);
     }
 
-    public void deinit() {
+    public void unInitGLSView() {
         if (mRenderer != null) {
             mRenderer.deinit();
             mRenderer = null;
