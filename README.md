@@ -23,6 +23,8 @@
 这种方法是在学习OpenGL的时候发现的，主要步骤如下：
 实例化GLSurfaceView，并绑定到Camera上面。 
 实现Render渲染，在onDrawFrame中对画面进行裁剪。
+
 最终效果：
+
 <img src="https://github.com/FrankdeBoers/Self_CameraSquare/blob/master/screenshot/squarecamera.png" width="50%" height="50%" />
 
