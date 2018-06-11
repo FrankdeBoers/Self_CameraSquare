@@ -9,6 +9,7 @@
 >  3. 更改hal层config.ftbl.common_raw.h文件，由驱动层处理。
 
 以MIUI9 拥有的方形预览为例，接下来分析各种方法的实现：
+
 ![MIUI9的方形预览](https://img-blog.csdn.net/20180509140844332?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0ZyYWtpZV9Ld29r/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
 
 ##1.使用遮罩，盖住一部分预览界面。
@@ -22,5 +23,6 @@
 这种方法是在学习OpenGL的时候发现的，主要步骤如下：
 实例化GLSurfaceView，并绑定到Camera上面。 
 实现Render渲染，在onDrawFrame中对画面进行裁剪。
-
+最终效果：
+<img src="https://github.com/FrankdeBoers/Self_CameraSquare/blob/master/screenshot/squarecamera.png" width="50%" height="50%" />
 
