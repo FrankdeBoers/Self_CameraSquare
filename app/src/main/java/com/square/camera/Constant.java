@@ -1,4 +1,4 @@
-package ghc.filterghc.CameraV1GLSurfaceView;
+package com.square.camera;
 
 /**
  * Created by guohongcheng on 2018/5/10.

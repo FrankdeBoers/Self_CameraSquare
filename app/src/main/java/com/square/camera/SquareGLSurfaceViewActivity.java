@@ -1,17 +1,16 @@
-package ghc.filterghc.CameraV1GLSurfaceView;
+package com.square.camera;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.view.Window;
 import android.view.WindowManager;
 
 public class SquareGLSurfaceViewActivity extends Activity {
     private SquareGLSurfaceView mGLSurfaceView;
-    private int mCameraId;
-    private SquareCamera mCamera;
+    private int mCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
+    private SquareCameraManager mCamera;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,10 +21,8 @@ public class SquareGLSurfaceViewActivity extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         mGLSurfaceView = new SquareGLSurfaceView(this);
-        mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
-        DisplayMetrics dm = new DisplayMetrics();
-        mCamera = new SquareCamera(this);
-        if (!mCamera.openCamera(dm.widthPixels, dm.heightPixels, mCameraId)) {
+        mCamera = new SquareCameraManager(this);
+        if (!mCamera.openCamera(mCameraId)) {
             return;
         }
         mGLSurfaceView.initGLSView(mCamera, false);

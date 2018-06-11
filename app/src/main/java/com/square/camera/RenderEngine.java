@@ -1,33 +1,19 @@
-package ghc.filterghc.CameraV1GLSurfaceView;
-
-import android.opengl.GLES11Ext;
+package com.square.camera;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import static android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-import static android.opengl.GLES20.GL_FLOAT;
 import static android.opengl.GLES20.GL_FRAGMENT_SHADER;
-import static android.opengl.GLES20.GL_TRIANGLES;
 import static android.opengl.GLES20.GL_VERTEX_SHADER;
-import static android.opengl.GLES20.glActiveTexture;
 import static android.opengl.GLES20.glAttachShader;
-import static android.opengl.GLES20.glBindTexture;
 import static android.opengl.GLES20.glCompileShader;
 import static android.opengl.GLES20.glCreateProgram;
 import static android.opengl.GLES20.glCreateShader;
-import static android.opengl.GLES20.glDrawArrays;
-import static android.opengl.GLES20.glEnableVertexAttribArray;
-import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetError;
-import static android.opengl.GLES20.glGetUniformLocation;
 import static android.opengl.GLES20.glLinkProgram;
 import static android.opengl.GLES20.glShaderSource;
-import static android.opengl.GLES20.glUniform1i;
-import static android.opengl.GLES20.glUniformMatrix4fv;
 import static android.opengl.GLES20.glUseProgram;
-import static android.opengl.GLES20.glVertexAttribPointer;
 
 /**
  * Created by GHC on 2017/6/12.
@@ -35,22 +21,13 @@ import static android.opengl.GLES20.glVertexAttribPointer;
 
 public class RenderEngine {
 
-    private static RenderEngine renderEngine = null;
-
     private FloatBuffer mBuffer;
-    private int mOESTextureId = -1;
     private int vertexShader = -1;
     private int fragmentShader = -1;
 
     private int mShaderProgram = -1;
 
-    private int aPositionLocation = -1;
-    private int aTextureCoordLocation = -1;
-    private int uTextureMatrixLocation = -1;
-    private int uTextureSamplerLocation = -1;
-
-    public RenderEngine(int OESTextureId) {
-        mOESTextureId = OESTextureId;
+    public RenderEngine() {
         mBuffer = createBuffer(vertexData);
         vertexShader = loadShader(GL_VERTEX_SHADER, VERTEX_SHADER);
         fragmentShader = loadShader(GL_FRAGMENT_SHADER, FRAGMENT_SHADER);
@@ -123,44 +100,12 @@ public class RenderEngine {
         return program;
     }
 
-    public void drawTexture(float[] transformMatrix) {
-        aPositionLocation = glGetAttribLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.POSITION_ATTRIBUTE);
-        aTextureCoordLocation = glGetAttribLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.TEXTURE_COORD_ATTRIBUTE);
-        uTextureMatrixLocation = glGetUniformLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.TEXTURE_MATRIX_UNIFORM);
-        uTextureSamplerLocation = glGetUniformLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.TEXTURE_SAMPLER_UNIFORM);
-
-        glActiveTexture(GL_TEXTURE_EXTERNAL_OES);
-        glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mOESTextureId);
-        glUniform1i(uTextureSamplerLocation, 0);
-        glUniformMatrix4fv(uTextureMatrixLocation, 1, false, transformMatrix, 0);
-
-        if (mBuffer != null) {
-            mBuffer.position(0);
-            glEnableVertexAttribArray(aPositionLocation);
-            glVertexAttribPointer(aPositionLocation, 2, GL_FLOAT, false, 16, mBuffer);
-
-            mBuffer.position(2);
-            glEnableVertexAttribArray(aTextureCoordLocation);
-            glVertexAttribPointer(aTextureCoordLocation, 2, GL_FLOAT, false, 16, mBuffer);
-
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-        }
-    }
-
     public int getShaderProgram() {
         return mShaderProgram;
     }
 
     public FloatBuffer getBuffer() {
         return mBuffer;
-    }
-
-    public int getOESTextureId() {
-        return mOESTextureId;
-    }
-
-    public void setOESTextureId(int OESTextureId) {
-        mOESTextureId = OESTextureId;
     }
 }
 

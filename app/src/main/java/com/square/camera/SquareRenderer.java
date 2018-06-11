@@ -1,4 +1,4 @@
-package ghc.filterghc.CameraV1GLSurfaceView;
+package com.square.camera;
 
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES11Ext;
@@ -19,7 +19,6 @@ import static android.opengl.GLES20.glBindTexture;
 import static android.opengl.GLES20.glClearColor;
 import static android.opengl.GLES20.glDrawArrays;
 import static android.opengl.GLES20.glEnableVertexAttribArray;
-import static android.opengl.GLES20.glGenFramebuffers;
 import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetUniformLocation;
 import static android.opengl.GLES20.glUniform1i;
@@ -33,12 +32,12 @@ import static javax.microedition.khronos.opengles.GL11.GL_FLOAT;
 
 public class SquareRenderer implements GLSurfaceView.Renderer {
 
-    private static final String TAG = "Filter_MyRenderer";
+    private static final String TAG = "SquareRenderer";
     private int mOESTextureId = -1;
     private SurfaceTexture mSurfaceTexture;
     private float[] transformMatrix = new float[16];
     private SquareGLSurfaceView mGLSurfaceView;
-    private SquareCamera mCamera;
+    private SquareCameraManager mCamera;
     private boolean bIsPreviewStarted;
     private RenderEngine mRenderEngine;
     private FloatBuffer mDataBuffer;
@@ -47,27 +46,30 @@ public class SquareRenderer implements GLSurfaceView.Renderer {
     private int aTextureCoordLocation = -1;
     private int uTextureMatrixLocation = -1;
     private int uTextureSamplerLocation = -1;
-    private int[] mFBOIds = new int[1];
 
-    private int mScreenWidth = 800;
-
-    public void init(SquareGLSurfaceView glSurfaceView, SquareCamera camera, boolean isPreviewStarted, int width) {
+    public void init(SquareGLSurfaceView glSurfaceView, SquareCameraManager camera, boolean isPreviewStarted) {
         mGLSurfaceView = glSurfaceView;
         mCamera = camera;
         bIsPreviewStarted = isPreviewStarted;
-        mScreenWidth = width;
 
     }
 
+    /*
+    * 一般在onSurfaceCreated 做一些初始化的动作
+    * Render的初始化主要包括：
+    * 创建shader---> 加载shader代码---> 编译shader  ====》最终可以生成vertexShader和fragmentShader
+    * 创建porgram---> 附着顶点着色器和片段着色器到program--->链接program---> 通知OpenGL ES使用此program  ===》最终将shader添加到program中
+    *
+    * */
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+        // 获取一个纹理句柄
         mOESTextureId = createOESTextureObject();
-        mRenderEngine = new RenderEngine(mOESTextureId);
+        Log.d(TAG, "mOESTextureId:" + mOESTextureId);
+        // 初始化Render
+        mRenderEngine = new RenderEngine();
         mDataBuffer = mRenderEngine.getBuffer();
         mShaderProgram = mRenderEngine.getShaderProgram();
-        glGenFramebuffers(1, mFBOIds, 0);
-        glBindFramebuffer(GL_FRAMEBUFFER, mFBOIds[0]);
-        Log.i(TAG, "onSurfaceCreated: mFBOId: " + mFBOIds[0]);
     }
 
     @Override
@@ -95,10 +97,10 @@ public class SquareRenderer implements GLSurfaceView.Renderer {
 
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
 
-        aPositionLocation = glGetAttribLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.POSITION_ATTRIBUTE);
-        aTextureCoordLocation = glGetAttribLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.TEXTURE_COORD_ATTRIBUTE);
-        uTextureMatrixLocation = glGetUniformLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.TEXTURE_MATRIX_UNIFORM);
-        uTextureSamplerLocation = glGetUniformLocation(mShaderProgram, ghc.filterghc.CameraV1GLSurfaceView.RenderEngine.TEXTURE_SAMPLER_UNIFORM);
+        aPositionLocation = glGetAttribLocation(mShaderProgram, RenderEngine.POSITION_ATTRIBUTE);
+        aTextureCoordLocation = glGetAttribLocation(mShaderProgram, RenderEngine.TEXTURE_COORD_ATTRIBUTE);
+        uTextureMatrixLocation = glGetUniformLocation(mShaderProgram, RenderEngine.TEXTURE_MATRIX_UNIFORM);
+        uTextureSamplerLocation = glGetUniformLocation(mShaderProgram, RenderEngine.TEXTURE_SAMPLER_UNIFORM);
 
         glActiveTexture(GLES20.GL_TEXTURE0);
         glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mOESTextureId);
@@ -154,10 +156,17 @@ public class SquareRenderer implements GLSurfaceView.Renderer {
         bIsPreviewStarted = false;
     }
 
+    /*
+    * 返回一个纹理句柄，拿到这个纹理句柄后，就可以对它进行操作
+    * */
     public static int createOESTextureObject() {
         int[] tex = new int[1];
+        // 返回一个纹理句柄
         GLES20.glGenTextures(1, tex, 0);
+        // 绑定句柄
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, tex[0]);
+        // 纹理对象使用GL_TEXTURE_EXTERNAL_OES作为纹理目标，其是OpenGL ES扩展GL_OES_EGL_image_external定义的。
+        // https://blog.csdn.net/zsc09_leaf/article/details/17529769 有详细解释
         GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
                 GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
         GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
@@ -166,7 +175,6 @@ public class SquareRenderer implements GLSurfaceView.Renderer {
                 GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
                 GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
         return tex[0];
     }
 
